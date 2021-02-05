@@ -13,13 +13,7 @@ import java.util.stream.Collectors;
 
 class LoadsSignStore {
 
-    private final MobArena plugin;
-
-    LoadsSignStore(MobArena plugin) {
-        this.plugin = plugin;
-    }
-
-    SignStore load() {
+    static SignStore load(MobArena plugin) {
         YamlConfiguration yaml = new YamlConfiguration();
         try {
             File data = new File(plugin.getDataFolder(), "data");

@@ -117,8 +117,8 @@ public class SignBootstrap {
     }
 
     public static SignBootstrap create(MobArena plugin) {
-        TemplateStore templateStore = new LoadsTemplateStore(plugin).read();
-        SignStore signStore = new LoadsSignStore(plugin).load();
+        TemplateStore templateStore = LoadsTemplateStore.load(plugin);
+        SignStore signStore = LoadsSignStore.load(plugin);
 
         SignBootstrap bootstrap = new SignBootstrap(plugin, signStore, templateStore);
 
