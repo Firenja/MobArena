@@ -2,15 +2,19 @@ package com.garbagemule.MobArena.signs;
 
 import org.bukkit.Location;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class SignStore2 {
 
+    private final Map<Location, ArenaSign> signs = new HashMap<>();
+
     void add(ArenaSign sign) {
-        System.out.println("[SignStore2] add(ArenaSign)");
+        signs.put(sign.location, sign);
     }
 
     ArenaSign removeByLocation(Location location) {
-        System.out.println("[SignStore2] removeByLocation(Location)");
-        return null;
+        return signs.remove(location);
     }
 
 }
