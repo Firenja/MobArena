@@ -138,6 +138,26 @@ public class SignCreatorTest {
     }
 
     @Test
+    public void caseInsensitiveSignType() {
+        String arenaId = "castle";
+        String signType = "jOiN";
+        String templateId = "cool-sign";
+        String[] lines = {"[MA]", arenaId, signType, templateId};
+        Location location = mock(Location.class);
+        Arena arena = mock(Arena.class);
+        when(arenaMaster.getArenaWithName(arenaId)).thenReturn(arena);
+        when(templateStore.findById(templateId)).thenReturn(Optional.of(mock(Template.class)));
+        SignChangeEvent event = event(lines, location);
+
+        ArenaSign result = subject.create(event);
+
+        assertThat(result.location, equalTo(location));
+        assertThat(result.arenaId, equalTo(arenaId));
+        assertThat(result.type, equalTo(signType.toLowerCase()));
+        assertThat(result.templateId, equalTo(templateId));
+    }
+
+    @Test
     public void signWithoutTemplateUsesType() {
         String arenaId = "castle";
         String signType = "join";

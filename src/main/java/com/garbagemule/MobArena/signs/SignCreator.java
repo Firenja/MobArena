@@ -46,7 +46,7 @@ class SignCreator {
     }
 
     private String getSignType(SignChangeEvent event) {
-        String signType = trim(event, 2);
+        String signType = trim(event, 2).toLowerCase();
         if (signType.isEmpty()) {
             throw new IllegalArgumentException("Missing sign type on line 3");
         }
