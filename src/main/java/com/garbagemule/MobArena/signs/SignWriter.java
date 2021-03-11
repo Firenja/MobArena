@@ -21,6 +21,14 @@ class SignWriter {
 
     void write(ArenaSign sign) throws IOException {
         String line = serializer.serialize(sign);
+
+        for (String candidate : file.lines()) {
+            if (serializer.equal(candidate, line)) {
+                log.warning("Erasing conflicting sign entry:\n" + candidate);
+                file.erase(candidate);
+            }
+        }
+
         file.append(line);
     }
 

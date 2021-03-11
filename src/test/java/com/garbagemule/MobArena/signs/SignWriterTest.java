@@ -46,6 +46,43 @@ public class SignWriterTest {
     }
 
     @Test
+    public void writeCallsEraseOnConflicts() throws IOException {
+        ArenaSign sign = new ArenaSign(null, "cool-sign", "castle", "join");
+        String line = "some arbitrary serialization";
+        String c1 = "some conflicting line";
+        String c2 = "some non-conflicting line";
+        String c3 = "some other conflicting line";
+        when(serializer.serialize(sign)).thenReturn(line);
+        when(serializer.equal(c1, line)).thenReturn(true);
+        when(serializer.equal(c2, line)).thenReturn(false);
+        when(serializer.equal(c3, line)).thenReturn(true);
+        when(file.lines()).thenReturn(Arrays.asList(c1, c2, c3));
+
+        subject.write(sign);
+
+        verify(file).erase(c1);
+        verify(file).erase(c3);
+    }
+
+    @Test
+    public void writeLogsWarningOnConflicts() throws IOException {
+        ArenaSign sign = new ArenaSign(null, "cool-sign", "castle", "join");
+        String line = "some arbitrary serialization";
+        String c1 = "some conflicting line";
+        String c2 = "some non-conflicting line";
+        String c3 = "some other conflicting line";
+        when(serializer.serialize(sign)).thenReturn(line);
+        when(serializer.equal(c1, line)).thenReturn(true);
+        when(serializer.equal(c2, line)).thenReturn(false);
+        when(serializer.equal(c3, line)).thenReturn(true);
+        when(file.lines()).thenReturn(Arrays.asList(c1, c2, c3));
+
+        subject.write(sign);
+
+        verify(log, times(2)).warning(anyString());
+    }
+
+    @Test
     public void successfulWriteLogsNothing() throws IOException {
         ArenaSign sign = new ArenaSign(null, "cool-sign", "castle", "join");
         String line = "some arbitrary serialization";
