@@ -36,14 +36,12 @@ class SignWriter {
         String line = serializer.serialize(sign);
 
         for (String candidate : file.lines()) {
-            // Use serializer's equality check
             if (serializer.equal(candidate, line)) {
                 file.erase(candidate);
                 return;
             }
         }
 
-        // No match, log a warning
         log.warning("No match found in sign data file for sign:\n" + line);
     }
 
