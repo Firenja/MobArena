@@ -14,25 +14,25 @@ commands:
 permissions:
     mobarena.use.join:
         description: Join command
-        default: true
+        default: false
     mobarena.use.spec:
         description: Spec command
-        default: true
+        default: false
     mobarena.use.leave:
         description: Leave command
         default: true
     mobarena.use.arenalist:
         description: Arena list command
-        default: true
+        default: false
     mobarena.use.playerlist:
         description: Player list command
-        default: true
+        default: false
     mobarena.use.notready:
         description: Check who is not ready yet
         default: true
     mobarena.use.class:
         description: Pick a class by name
-        default: true
+        default: false
     mobarena.use.ready:
         description: Ready to start the battle
         default: true

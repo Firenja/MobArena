@@ -130,8 +130,11 @@ public class ArenaClass
      * @param items a list of Things
      */
     public void setItems(List<Thing> items) {
+        /*
         this.items = new ArrayList<>(items.size());
         items.forEach(this::addItem);
+
+         */
     }
 
     /**
@@ -165,6 +168,7 @@ public class ArenaClass
      * @param p a player
      */
     public void grantItems(Player p) {
+        /*
         PlayerInventory inv = p.getInventory();
 
         // Fork over the items.
@@ -179,6 +183,8 @@ public class ArenaClass
         if (leggings   != null) leggings.giveTo(p);
         if (boots      != null) boots.giveTo(p);
         if (offhand    != null) offhand.giveTo(p);
+
+         */
     }
 
     public void grantPotionEffects(Player p) {
@@ -254,16 +260,19 @@ public class ArenaClass
         }
 
         @Override
-        public void grantItems(Player p) {
+        public void grantItems(Player p)
+        {
+            /*
             Arena arena = am.getArenaWithPlayer(p);
             if (arena != null) {
                 try {
                     arena.getInventoryManager().equip(p);
-                    removeBannedItems(p.getInventory());
                 } catch (Exception e) {
                     am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
                 }
             }
+
+             */
         }
 
         @Override
@@ -271,22 +280,5 @@ public class ArenaClass
             return null;
         }
 
-        private void removeBannedItems(PlayerInventory inv) {
-            ItemStack[] contents = inv.getContents();
-            IntStream.range(0, contents.length)
-                .filter(i -> contents[i] != null)
-                .filter(i -> isBanned(contents[i].getType()))
-                .forEach(inv::clear);
-        }
-
-        private boolean isBanned(Material type) {
-            switch (type) {
-                case ENDER_PEARL:
-                case ENDER_CHEST:
-                case SHULKER_SHELL:
-                    return true;
-            }
-            return type.name().endsWith("_SHULKER_BOX");
-        }
     }
 }

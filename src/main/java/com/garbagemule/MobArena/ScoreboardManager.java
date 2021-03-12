@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ScoreboardManager {
-    private static final String DISPLAY_NAME = ChatColor.GREEN + "Kills       " + ChatColor.AQUA + "Wave ";
+    private static final String DISPLAY_NAME = ChatColor.GREEN + "Getötet       " + ChatColor.AQUA + "Welle ";
 
     private Arena arena;
     private Scoreboard scoreboard;

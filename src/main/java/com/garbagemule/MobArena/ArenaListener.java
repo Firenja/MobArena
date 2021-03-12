@@ -520,7 +520,7 @@ public class ArenaListener
 
     public void onEntityDeath(EntityDeathEvent event) {
         if (event instanceof PlayerDeathEvent) {
-            onPlayerDeath((PlayerDeathEvent) event, (Player) event.getEntity());
+            onPlayerDeath((Player) event.getEntity());
         }
         else if (monsters.hasPet(event.getEntity())) {
             monsters.removePet(event.getEntity());
@@ -536,26 +536,19 @@ public class ArenaListener
         }
     }
 
-    private void onPlayerDeath(PlayerDeathEvent event, Player player) {
-        if (arena.inArena(player) || arena.inLobby(player)) {
-            event.getDrops().clear();
-            event.setDroppedExp(0);
-            event.setKeepLevel(true);
-            if (player.getKiller() != null) {
+    private void onPlayerDeath(Player player)
+    {
+        if (arena.inArena(player) || arena.inLobby(player))
+        {
+            if (player.getKiller() != null)
+            {
                 callKillEvent(player.getKiller(), player);
             }
-            if (arena.getSettings().getBoolean("show-death-messages", true)) {
-                arena.announce(event.getDeathMessage());
-            }
-            if (arena.getSettings().getBoolean("keep-exp", false)) {
-                arena.getRewardManager().addReward(player, new ExperienceThing(player.getTotalExperience()));
-            }
-            event.setDeathMessage(null);
             arena.getScoreboard().death(player);
             arena.playerDeath(player);
-        } else if (arena.inSpec(player)) {
-            event.getDrops().clear();
-            event.setDroppedExp(0);
+        }
+        else if (arena.inSpec(player))
+        {
             arena.getScoreboard().death(player);
             arena.playerLeave(player);
         }
@@ -724,14 +717,17 @@ public class ArenaListener
 
     private void onPlayerDamage(EntityDamageEvent event, Player player, Entity damager) {
         // Cancel all damage in the lobby and spec area
-        if (arena.inLobby(player) || arena.inSpec(player)) {
+        if (arena.inLobby(player) || arena.inSpec(player))
+        {
             event.setCancelled(true);
             return;
         }
 
-        if (arena.inArena(player)) {
+        if (arena.inArena(player))
+        {
             // Cancel PvP damage if disabled
-            if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
+            if (!pvpEnabled && damager instanceof Player && !damager.equals(player))
+            {
                 event.setCancelled(true);
                 return;
             }
@@ -739,7 +735,8 @@ public class ArenaListener
             arena.getArenaPlayer(player).getStats().add("dmgTaken", event.getDamage());
 
             // Redirect pet aggro (but not at players)
-            if (damager instanceof LivingEntity && !(damager instanceof Player)) {
+            if (damager instanceof LivingEntity && !(damager instanceof Player))
+            {
                 LivingEntity target = (LivingEntity) damager;
                 monsters.getPets(player).forEach(pet -> {
                     if (pet instanceof Mob) {
@@ -750,6 +747,12 @@ public class ArenaListener
                     }
                 });
             }
+
+            if (player.getHealth() <= event.getFinalDamage())
+            {
+                onPlayerDeath(player);
+            }
+
         }
     }
 

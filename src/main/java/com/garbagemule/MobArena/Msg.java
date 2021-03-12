@@ -88,7 +88,8 @@ public enum Msg {
     MISC_MULTIPLE_MATCHES("Did you mean one of these commands?"),
     MISC_NO_MATCHES("Command not found. Type &e/ma help&r"),
     MISC_MA_LEAVE_REMINDER("Remember to use &e/ma leave&r when you are done."),
-    MISC_NONE("&6<none>&r");
+    MISC_NONE("&6<none>&r"),
+    Player_Death("Du bist gestorben");
 
     private String value;
 
