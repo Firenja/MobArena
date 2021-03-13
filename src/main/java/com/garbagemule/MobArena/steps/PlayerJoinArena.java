@@ -19,7 +19,6 @@ public class PlayerJoinArena {
         factories.add(MoveToLobby.create(arena));
         factories.add(SetGameMode.create());
         factories.add(Defer.it(GrantRewards.create(arena)));
-        factories.add(ClearInventory.create(arena));
         factories.add(ClearPotionEffects.create());
         factories.add(SetFlying.create());
         factories.add(SetHealth.create());
