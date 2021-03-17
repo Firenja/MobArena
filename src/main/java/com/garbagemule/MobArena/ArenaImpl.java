@@ -76,37 +76,42 @@ import java.util.stream.Collectors;
 public class ArenaImpl implements Arena
 {
     // General stuff
-    private MobArena plugin;
-    private String name;
-    private String slug;
+    private final MobArena plugin;
+    private final String name;
+    private final String slug;
     private World world;
-    private Messenger messenger;
-    private Announcer announcer;
+    private final Messenger messenger;
+    private final Announcer announcer;
 
     // Settings section of the config-file for this arena.
-    private ConfigurationSection settings;
+    private final ConfigurationSection settings;
 
     // Run-time settings and critical config settings
     private boolean enabled, protect, running, edit;
 
     // World stuff
-    private boolean allowMonsters, allowAnimals;
+    private final boolean allowMonsters;
+    private final boolean allowAnimals;
     //private Difficulty spawnMonsters;
 
     // Warps, points and locations
-    private ArenaRegion region;
+    private final ArenaRegion region;
     private Leaderboard leaderboard;
 
     // Player stuff
-    private InventoryManager  inventoryManager;
-    private RewardManager     rewardManager;
-    private ClassLimitManager limitManager;
-    private Map<Player,ArenaPlayer> arenaPlayerMap;
+    private final InventoryManager  inventoryManager;
+    private final RewardManager     rewardManager;
+    private final ClassLimitManager limitManager;
+    private final Map<Player,ArenaPlayer> arenaPlayerMap;
 
-    private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
-    private Set<Player> movingPlayers;
-    private Set<Player> leavingPlayers;
-    private Set<Player> randoms;
+    private final Set<Player> arenaPlayers;
+    private final Set<Player> lobbyPlayers;
+    private final Set<Player> readyPlayers;
+    private final Set<Player> specPlayers;
+    private final Set<Player> deadPlayers;
+    private final Set<Player> movingPlayers;
+    private final Set<Player> leavingPlayers;
+    private final Set<Player> randoms;
 
     // Classes stuff
     private ArenaClass defaultClass;

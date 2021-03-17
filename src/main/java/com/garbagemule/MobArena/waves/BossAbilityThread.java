@@ -46,8 +46,8 @@ public class BossAbilityThread implements Runnable
         Ability ability = abilities.get(counter++ % abilities.size());
 
         // And make each boss in this boss wave use it!
-        for (MABoss boss : bosses) {
-            wave.announceAbility(ability, boss, arena);
+        for (MABoss boss : bosses)
+        {
             ability.execute(arena, boss);
         }
 

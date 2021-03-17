@@ -29,9 +29,12 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class MASpawnThread implements Runnable
 {
+    public static final Random rnd = new Random();
+
     private MobArena plugin;
     private Arena arena;
     private ArenaRegion region;
@@ -50,10 +53,12 @@ public class MASpawnThread implements Runnable
     /**
      * Create a new monster spawner for the input arena.
      * Note that the arena's WaveManager is reset
+     *
      * @param plugin a MobArena instance
-     * @param arena an arena
+     * @param arena  an arena
      */
-    public MASpawnThread(MobArena plugin, Arena arena) {
+    public MASpawnThread(MobArena plugin, Arena arena)
+    {
         this.plugin = plugin;
         this.arena = arena;
         this.region = arena.getRegion();
@@ -69,7 +74,8 @@ public class MASpawnThread implements Runnable
      * Reset the spawner, so all systems and settings are
      * ready for a new session.
      */
-    public void reset() {
+    public void reset()
+    {
         waveManager.reset();
         playerCount = arena.getPlayersInArena().size();
         monsterLimit = arena.getSettings().getInt("monster-limit", 100);
@@ -81,22 +87,27 @@ public class MASpawnThread implements Runnable
         nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
     }
 
-    public void start() {
-        if (task != null) {
+    public void start()
+    {
+        if (task != null)
+        {
             plugin.getLogger().warning("Starting spawner in arena " + arena.configName() + " with existing spawner still running. This should never happen.");
             task.cancel();
             task = null;
         }
 
         int delay = arena.getSettings().getInt("first-wave-delay", 5) * 20;
-        task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        task = Bukkit.getScheduler().runTaskLater(plugin, () ->
+        {
             arena.getEventListener().pvpActivate();
             this.run();
         }, delay);
     }
 
-    public void stop() {
-        if (task == null) {
+    public void stop()
+    {
+        if (task == null)
+        {
             plugin.getLogger().warning("Can't stop non-existent spawner in arena " + arena.configName() + ". This should never happen.");
             return;
         }
@@ -107,9 +118,11 @@ public class MASpawnThread implements Runnable
         task = null;
     }
 
-    public void run() {
+    public void run()
+    {
         // If the arena isn't running or if there are no players in it.
-        if (!arena.isRunning() || arena.getPlayersInArena().isEmpty()) {
+        if (!arena.isRunning() || arena.getPlayersInArena().isEmpty())
+        {
             return;
         }
 
@@ -118,7 +131,8 @@ public class MASpawnThread implements Runnable
         removeCheatingPlayers();
 
         // In case some players were removed, check again.
-        if (!arena.isRunning()) {
+        if (!arena.isRunning())
+        {
             return;
         }
 
@@ -126,7 +140,8 @@ public class MASpawnThread implements Runnable
         int nextWave = waveManager.getWaveNumber() + 1;
 
         // Check if wave needs to be cleared first. If so, return!
-        if (!isWaveClear()) {
+        if (!isWaveClear())
+        {
             arena.scheduleTask(this, 60);
             return;
         }
@@ -134,20 +149,25 @@ public class MASpawnThread implements Runnable
         // Fire off the event. If cancelled, try again in 3 seconds.
         NewWaveEvent event = new NewWaveEvent(arena, waveManager.getNext(), nextWave);
         plugin.getServer().getPluginManager().callEvent(event);
-        if (event.isCancelled()) {
+        if (event.isCancelled())
+        {
             arena.scheduleTask(this, 60);
             return;
         }
 
         // Delay the next wave
-        if (nextWaveDelay > 0) {
+        if (nextWaveDelay > 0)
+        {
             task = Bukkit.getScheduler().runTaskLater(plugin, this::spawnNextWave, nextWaveDelay * 20);
-        } else {
+        }
+        else
+        {
             spawnNextWave();
         }
     }
 
-    private void spawnNextWave() {
+    private void spawnNextWave()
+    {
         // Grab the wave number.
         int nextWave = waveManager.getWaveNumber() + 1;
 
@@ -155,15 +175,18 @@ public class MASpawnThread implements Runnable
         grantRewards(nextWave - 1);
 
         // Check if this is the final wave, in which case, end instead of spawn
-        if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave()) {
+        if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave())
+        {
             // Fire the complete event
             ArenaCompleteEvent complete = new ArenaCompleteEvent(arena);
             plugin.getServer().getPluginManager().callEvent(complete);
 
             // Then force leave everyone
             List<Player> players = new ArrayList<>(arena.getPlayersInArena());
-            for (Player p : players) {
-                if (arena.getSettings().getBoolean("keep-exp", false)) {
+            for (Player p : players)
+            {
+                if (arena.getSettings().getBoolean("keep-exp", false))
+                {
                     arena.getRewardManager().addReward(p, new ExperienceThing(p.getTotalExperience()));
                 }
                 arena.playerLeave(p);
@@ -181,7 +204,8 @@ public class MASpawnThread implements Runnable
         task = Bukkit.getScheduler().runTaskLater(plugin, this, waveInterval * 20);
     }
 
-    private void spawnWave(int wave) {
+    private void spawnWave(int wave)
+    {
         Wave w = waveManager.next();
 
         w.announce(arena, wave);
@@ -189,14 +213,17 @@ public class MASpawnThread implements Runnable
         arena.getScoreboard().updateWave(wave);
 
         // Set the players' level to the wave number
-        if (wavesAsLevel) {
-            for (Player p : arena.getPlayersInArena()) {
+        if (wavesAsLevel)
+        {
+            for (Player p : arena.getPlayersInArena())
+            {
                 p.setLevel(wave);
                 p.setExp(0.0f);
             }
         }
 
-        if (w.getType() == WaveType.UPGRADE) {
+        if (w.getType() == WaveType.UPGRADE)
+        {
             handleUpgradeWave(w);
             return;
         }
@@ -209,10 +236,13 @@ public class MASpawnThread implements Runnable
         int index = 0;
         double mul = w.getHealthMultiplier();
 
-        for (Map.Entry<MACreature, Integer> entry : monsters.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++, index++) {
+        for (Map.Entry<MACreature, Integer> entry : monsters.entrySet())
+        {
+            for (int i = 0; i < entry.getValue(); i++, index++)
+            {
                 // Check if monster limit has been reached.
-                if (monsterManager.getMonsters().size() >= monsterLimit) {
+                if (monsterManager.getMonsters().size() >= monsterLimit)
+                {
                     return;
                 }
 
@@ -220,6 +250,8 @@ public class MASpawnThread implements Runnable
                 Location spawnpoint = spawnpoints.get(index % totalSpawnpoints);
 
                 // Spawn the monster
+
+                spawnpoint = new Location(spawnpoint.getWorld(), spawnpoint.getX() + rnd.nextInt(2) - 1, spawnpoint.getY(), spawnpoint.getZ() + rnd.nextInt(2) - 1);
                 LivingEntity e = entry.getKey().spawn(arena, world, spawnpoint);
 
                 // Add potion effects
@@ -230,22 +262,29 @@ public class MASpawnThread implements Runnable
 
                 // Set the health.
                 int health = (int) Math.max(1D, e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() * mul);
-                try {
+                try
+                {
                     e.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
                     e.setHealth(health);
-                } catch (IllegalArgumentException ex) {
+                }
+                catch (IllegalArgumentException ex)
+                {
                     // Spigot... *facepalm*
                     plugin.getLogger().severe("Can't set health to " + health + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
                     plugin.getLogger().severe(ex.getLocalizedMessage());
-                    if (w.getType() == WaveType.BOSS) {
+                    if (w.getType() == WaveType.BOSS)
+                    {
                         ((BossWave) w).setBossName("SPIGOT ERROR");
-                    } else {
+                    }
+                    else
+                    {
                         e.setCustomName("SPIGOT ERROR");
                     }
                 }
 
                 // Switch on the type.
-                switch (w.getType()){
+                switch (w.getType())
+                {
                     case BOSS:
                         BossWave bw = (BossWave) w;
                         double maxHealth = bw.getMaxHealth(playerCount);
@@ -258,7 +297,8 @@ public class MASpawnThread implements Runnable
                         boss.setDrops(bw.getDrops());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
-                        if (bw.getBossName() != null) {
+                        if (bw.getBossName() != null)
+                        {
                             e.setCustomName(bw.getBossName());
                             e.setCustomNameVisible(true);
                         }
@@ -279,10 +319,12 @@ public class MASpawnThread implements Runnable
         }
     }
 
-    private void handleUpgradeWave(Wave w) {
+    private void handleUpgradeWave(Wave w)
+    {
         UpgradeWave uw = (UpgradeWave) w;
 
-        for (Player p : arena.getPlayersInArena()) {
+        for (Player p : arena.getPlayersInArena())
+        {
             String slug = arena.getArenaPlayer(p).getArenaClass().getSlug();
             uw.grantItems(p, slug);
             uw.grantItems(p, "all");
@@ -295,55 +337,69 @@ public class MASpawnThread implements Runnable
      * Check if the wave is clear for new spawns.
      * If clear-boss-before-next: true, bosses must be dead.
      * If clear-wave-before-next: true, all monsters must be dead.
+     *
      * @return true, if the wave is "clear" for new spawns.
      */
-    private boolean isWaveClear() {
+    private boolean isWaveClear()
+    {
         // Check for monster limit
-        if (monsterManager.getMonsters().size() >= monsterLimit) {
+        if (monsterManager.getMonsters().size() >= monsterLimit)
+        {
             return false;
         }
 
         // Check for boss clear
-        if (bossClear && !monsterManager.getBossMonsters().isEmpty()) {
+        if (bossClear && !monsterManager.getBossMonsters().isEmpty())
+        {
             return false;
         }
 
         // Check for wave and pre boss clear
-        if (waveClear && !monsterManager.getMonsters().isEmpty()) {
+        if (waveClear && !monsterManager.getMonsters().isEmpty())
+        {
             return false;
         }
 
         // Check for pre boss clear
-        if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && !monsterManager.getMonsters().isEmpty()) {
+        if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && !monsterManager.getMonsters().isEmpty())
+        {
             return false;
         }
 
         // Check for final wave
-        if (!monsterManager.getMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave()) {
+        if (!monsterManager.getMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave())
+        {
             return false;
         }
 
         return true;
     }
 
-    private void removeDeadMonsters() {
+    private void removeDeadMonsters()
+    {
         List<Entity> tmp = new ArrayList<>(monsterManager.getMonsters());
-        for (Entity e : tmp) {
-            if (e == null) {
+        for (Entity e : tmp)
+        {
+            if (e == null)
+            {
                 continue;
             }
 
-            if (e.isDead() || !region.contains(e.getLocation())) {
+            if (e.isDead() || !region.contains(e.getLocation()))
+            {
                 monsterManager.remove(e);
                 e.remove();
             }
         }
     }
 
-    private void removeCheatingPlayers() {
+    private void removeCheatingPlayers()
+    {
         List<Player> players = new ArrayList<>(arena.getPlayersInArena());
-        for (Player p : players) {
-            if (region.contains(p.getLocation())) {
+        for (Player p : players)
+        {
+            if (region.contains(p.getLocation()))
+            {
                 continue;
             }
 
@@ -353,22 +409,29 @@ public class MASpawnThread implements Runnable
         }
     }
 
-    private void grantRewards(int wave) {
-        for (Map.Entry<Integer, ThingPicker> entry : arena.getEveryWaveEntrySet()) {
-            if (wave > 0 && wave % entry.getKey() == 0) {
+    private void grantRewards(int wave)
+    {
+        for (Map.Entry<Integer, ThingPicker> entry : arena.getEveryWaveEntrySet())
+        {
+            if (wave > 0 && wave % entry.getKey() == 0)
+            {
                 addReward(entry.getValue());
             }
         }
 
         ThingPicker after = arena.getAfterWaveReward(wave);
-        if (after != null) {
+        if (after != null)
+        {
             addReward(after);
         }
     }
 
-    private void updateStats(int wave) {
-        for (ArenaPlayer ap : arena.getArenaPlayerSet()) {
-            if (arena.getPlayersInArena().contains(ap.getPlayer())) {
+    private void updateStats(int wave)
+    {
+        for (ArenaPlayer ap : arena.getArenaPlayerSet())
+        {
+            if (arena.getPlayersInArena().contains(ap.getPlayer()))
+            {
                 ap.getStats().inc("lastWave");
             }
         }
@@ -382,17 +445,21 @@ public class MASpawnThread implements Runnable
      * ////////////////////////////////////////////////////////////////////
      */
 
-    public int getPlayerCount() {
+    public int getPlayerCount()
+    {
         return playerCount;
     }
 
     /**
      * Rewards all players with an item from the input String.
      */
-    private void addReward(ThingPicker picker) {
-        for (Player p : arena.getPlayersInArena()) {
+    private void addReward(ThingPicker picker)
+    {
+        for (Player p : arena.getPlayersInArena())
+        {
             Thing reward = picker.pick();
-            if (reward != null) {
+            if (reward != null)
+            {
                 rewardManager.addReward(p, reward);
                 arena.getMessenger().tell(p, Msg.WAVE_REWARD, reward.toString());
             }
