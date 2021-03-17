@@ -2,6 +2,8 @@ package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
+import io.lumine.xikage.mythicmobs.api.bukkit.BukkitAPIHelper;
+import io.lumine.xikage.mythicmobs.api.exceptions.InvalidMobTypeException;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,11 +28,17 @@ import java.util.Map;
 public class MACreature
 {
     // This part must come before the constants!
-    private static Map<String,MACreature> map;
-    static {
+    private static Map<String, MACreature> map;
+
+    BukkitAPIHelper mm = new BukkitAPIHelper();
+    
+    static
+    {
         map = new HashMap<>();
-        for (EntityType type : EntityType.values()) {
-            if (type.isAlive()) {
+        for (EntityType type : EntityType.values())
+        {
+            if (type.isAlive())
+            {
                 // Instantiating a new creature registers it
                 new MACreature(type);
             }
@@ -88,7 +96,8 @@ public class MACreature
     private String plural;
     private EntityType type;
 
-    public MACreature(String name, String plural, EntityType type) {
+    public MACreature(String name, String plural, EntityType type)
+    {
         this.name = name;
         this.plural = (plural != null) ? plural : name;
         this.type = type;
@@ -96,41 +105,74 @@ public class MACreature
         register();
     }
 
-    public MACreature(String name, EntityType type) {
+    public MACreature(String name, EntityType type)
+    {
         this(name, name + "s", type);
     }
 
-    private MACreature(EntityType type) {
+    private MACreature(EntityType type)
+    {
         this(
-            type.name().toLowerCase().replaceAll("[-_\\.]", ""),
-            type.name().toLowerCase().replaceAll("[-_\\.]", "") + "s",
-            type
+                type.name().toLowerCase().replaceAll("[-_\\.]", ""),
+                type.name().toLowerCase().replaceAll("[-_\\.]", "") + "s",
+                type
         );
     }
 
-    private void register() {
+    private void register()
+    {
         map.put(name, this);
         map.put(plural, this);
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public EntityType getType() {
+    public EntityType getType()
+    {
         return type;
     }
 
-    public static MACreature fromString(String string) {
-        return map.get(string.toLowerCase().replaceAll("[-_\\.]", ""));
+    public static MACreature fromString(String string)
+    {
+        if (map.get(string.toLowerCase().replaceAll("[-_\\.]", "")) != null)
+        {
+            return map.get(string.toLowerCase().replaceAll("[-_\\.]", ""));
+        }
+        else if (string.contains("mm-"))
+        {
+            return new MACreature(string,EntityType.UNKNOWN);
+        }
+        return null;
     }
 
-    public LivingEntity spawn(Arena arena, World world, Location loc) {
-        LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
-        e.getEquipment().clear();
+    public LivingEntity spawn(Arena arena, World world, Location loc)
+    {
+        LivingEntity e = null;
+        if (type == EntityType.UNKNOWN)
+        {
+            try
+            {
+                e = (LivingEntity) mm.spawnMythicMob(name,loc);
+            }
+            catch (InvalidMobTypeException ignore)
+            {
+                
+            }
+        }
+        else 
+        {
+            e = (LivingEntity) world.spawnEntity(loc, type);
+            e.getEquipment().clear();
+        }
+        
+
         e.setCanPickupItems(false);
 
-        switch (this.name) {
+        switch (this.name)
+        {
             case "sheep":
                 ((Sheep) e).setColor(colors.get(MobArena.random.nextInt(colors.size())));
                 break;
@@ -146,7 +188,7 @@ public class MACreature
                 break;
             case "slime":
             case "magmacube":
-                ((Slime) e).setSize( (1 + MobArena.random.nextInt(3)) );
+                ((Slime) e).setSize((1 + MobArena.random.nextInt(3)));
                 break;
             case "slimetiny":
             case "magmacubetiny":
@@ -193,7 +235,8 @@ public class MACreature
                 break;
         }
 
-        if (e instanceof Creature) {
+        if (e instanceof Creature)
+        {
             Creature c = (Creature) e;
             c.setTarget(WaveUtils.getClosestPlayer(arena, e));
         }
