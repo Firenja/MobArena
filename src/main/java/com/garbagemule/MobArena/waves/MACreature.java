@@ -91,6 +91,8 @@ public class MACreature
     // 1.8 creatures
     public static final MACreature KILLERBUNNY = new MACreature("killerbunny", "killerbunnies", EntityType.RABBIT);
 
+    public static final MACreature PIGZOMBIE = new MACreature("zombie-pigmen", "zombie-pigmens", EntityType.PIGLIN);
+
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private String name;
     private String plural;
